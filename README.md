@@ -32,8 +32,8 @@ Este projeto busca automaticamente os custos de todos os compartments da OCI em 
 
 1. Clone o repositório:
 ```bash
-git clone <url-do-repositorio>
-cd automacao_custos_mensal
+git clone https://github.com/Celta031/OCI-Cost-Automation.git
+cd OCI-Cost-Automation
 ```
 
 2. Crie e ative um ambiente virtual:
@@ -149,5 +149,7 @@ Contribuições são bem-vindas! Sinta-se à vontade para:
 Este projeto é de uso livre. Adapte conforme suas necessidades.
 
 ## 👥 Autor
+
+**[@Celta031](https://github.com/Celta031)**
 
 Desenvolvido para automatizar processos de gestão de custos OCI.

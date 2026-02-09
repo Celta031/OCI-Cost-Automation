@@ -2,9 +2,6 @@
 .oci/
 config
 
-# Arquivo local com configurações personalizadas (NÃO VERSIONAR)
-atualizar_custos_oci.py
-
 # Ambiente Virtual Python
 venv/
 env/
