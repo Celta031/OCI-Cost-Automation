@@ -1,0 +1,44 @@
+# Arquivos de configuração OCI (IMPORTANTE: não versionar credenciais)
+.oci/
+config
+
+# Arquivo local com configurações personalizadas (NÃO VERSIONAR)
+atualizar_custos_oci.py
+
+# Ambiente Virtual Python
+venv/
+env/
+ENV/
+.venv/
+
+# Arquivos Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Arquivos Excel (não versionar planilhas com dados sensíveis)
+*.xlsx
+*.xls
+*.xlsm
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.backup
