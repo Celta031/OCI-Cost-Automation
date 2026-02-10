@@ -67,11 +67,14 @@ def get_oci_costs(start_time, end_time):
         for item in response.data.items:
             comp_name = item.compartment_name if item.compartment_name else "Root"
             
+            # Trata computed_amount None como 0.0
+            valor = item.computed_amount if item.computed_amount is not None else 0.0
+            
             # Se o compartment já existe, soma o valor
             if comp_name in custos_dict:
-                custos_dict[comp_name] += item.computed_amount
+                custos_dict[comp_name] += valor
             else:
-                custos_dict[comp_name] = item.computed_amount
+                custos_dict[comp_name] = valor
                 
         print(f"Sucesso! Encontrados custos para {len(custos_dict)} compartments na OCI.")
         return custos_dict
