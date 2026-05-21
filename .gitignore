@@ -1,6 +1,10 @@
 # Arquivos de configuração OCI (IMPORTANTE: não versionar credenciais)
 .oci/
 config
+.env
+.env.local
+.env.*.local
+!.env.example
 
 # Ambiente Virtual Python
 venv/
@@ -19,6 +23,9 @@ __pycache__/
 *.xlsx
 *.xls
 *.xlsm
+
+# Script local legado (não publicar)
+atualizar_custos_oci.py
 
 # Arquivos de IDE
 .vscode/

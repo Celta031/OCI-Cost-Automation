@@ -1,155 +1,129 @@
-# OCI Cost Updater - Automação de Custos OCI
+# OCI Cost Updater
 
-Script Python para automatizar a atualização de planilhas Excel com custos mensais da Oracle Cloud Infrastructure (OCI).
+Python tool to fetch monthly Oracle Cloud Infrastructure (OCI) costs grouped by compartment and write them into an existing Excel workbook.
 
-## 📋 Descrição
+The project is designed for a simple monthly run, but avoids hardcoded production values. Local settings live in `.env`, credentials remain in the standard OCI SDK config, and command-line arguments can override monthly values when needed.
 
-Este projeto busca automaticamente os custos de todos os compartments da OCI em um período específico e atualiza uma planilha Excel existente com os valores obtidos. Além disso, gera um relatório de discrepâncias para identificar compartments com custo na OCI que não estão mapeados na planilha.
+## Features
 
-## 📁 Estrutura do Projeto
+- Fetches OCI cost usage grouped by `compartmentName`
+- Supports subcompartments through configurable `compartment_depth`
+- Updates an existing Excel worksheet by matching compartment names
+- Writes `0.0` for worksheet compartments without OCI cost in the period
+- Reports OCI compartments that were not found in the worksheet
+- Supports `--dry-run` to validate without saving the workbook
+- Returns non-zero exit codes for configuration and runtime failures
 
-- **`oci_cost_updater.py`** - Script principal com configurações personalizáveis
-- **`.gitignore`** - Arquivo que protege dados sensíveis de serem versionados
-- **`README.md`** - Documentação do projeto
+## Requirements
 
-## 🚀 Funcionalidades
+- Python 3.10 or newer
+- OCI SDK credentials configured in `~/.oci/config`
+- Read access to OCI usage/cost data
+- An Excel workbook with compartment names in a known column
 
-- ✅ Conexão automática com OCI usando credenciais configuradas
-- ✅ Busca de custos por compartment (incluindo subcompartments até 6 níveis de profundidade)
-- ✅ Atualização automática de planilha Excel
-- ✅ Inserção de valores zerados para compartments sem custo
-- ✅ Relatório de discrepâncias entre OCI e planilha
-- ✅ Período de faturamento configurável
+## Installation
 
-## 📦 Pré-requisitos
-
-- Python 3.7 ou superior
-- Conta Oracle Cloud Infrastructure (OCI)
-- Arquivo de configuração OCI (`~/.oci/config`) - [Como configurar](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm)
-- Planilha Excel com estrutura definida (nomes de compartments em uma coluna)
-
-## 🔧 Instalação
-
-1. Clone o repositório:
 ```bash
 git clone https://github.com/Celta031/OCI-Cost-Automation.git
 cd OCI-Cost-Automation
-```
 
-2. Crie e ative um ambiente virtual:
-```bash
 python -m venv venv
-# Windows
 venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
-3. Instale as dependências:
+For development and tests:
+
 ```bash
-pip install oci openpyxl
+pip install -r requirements-dev.txt
 ```
 
-4. Configure suas credenciais OCI:
-   - Crie o arquivo `~/.oci/config` seguindo a [documentação oficial](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm)
-   - Garanta que sua chave API esteja configurada corretamente
+## Configuration
 
-5. Edite as configurações no arquivo `oci_cost_updater.py` conforme sua necessidade (veja seção abaixo)
+Copy the example file and adjust the values for your monthly run:
 
-## ⚙️ Configuração
-
-Edite as variáveis no início do arquivo `oci_cost_updater.py`:
-
-```python
-# Caminho da planilha Excel
-ARQUIVO_EXCEL = 'sua-planilha.xlsx'
-
-# Nome da aba da planilha
-NOME_ABA = 'OCI CONSUMO'
-
-# Linha inicial dos dados (após cabeçalho)
-LINHA_INICIAL = 5
-
-# Coluna com nomes dos compartments
-COLUNA_COMPARTMENT = 'A'
-
-# Coluna onde os valores serão inseridos
-COLUNA_DESTINO = 'AB'
-
-# Período de faturamento (formato YYYY-MM-DDTHH:MM:SSZ)
-DATA_INICIO = "2025-12-21T00:00:00Z"
-DATA_FIM    = "2026-01-21T00:00:00Z"
+```bash
+copy .env.example .env
 ```
 
-## 📊 Estrutura da Planilha
+Example `.env`:
 
-A planilha deve ter a seguinte estrutura:
+```env
+OCI_EXCEL_PATH=sua-planilha.xlsx
+OCI_SHEET_NAME=OCI CONSUMO
+OCI_START_ROW=5
+OCI_COMPARTMENT_COLUMN=A
+OCI_TARGET_COLUMN=S
+OCI_BILLING_START=2026-04-21T00:00:00Z
+OCI_BILLING_END=2026-05-21T00:00:00Z
+OCI_PROFILE=DEFAULT
+OCI_COMPARTMENT_DEPTH=6
+```
 
-- **Coluna A**: Nomes dos compartments OCI
-- **Coluna de Destino** (configurável): Onde os valores de custo serão inseridos
-- **Linha Inicial**: Primeira linha com dados (após cabeçalho)
+Do not commit your real `.env`, OCI config, private keys, or production `.xlsx` files.
 
-## 🎯 Uso
+## Usage
 
-Execute o script:
+Run with values from `.env`:
 
 ```bash
 python oci_cost_updater.py
 ```
 
-O script irá:
-1. Conectar à OCI e buscar os custos do período configurado
-2. Abrir a planilha Excel especificada
-3. Atualizar os valores na coluna de destino
-4. Salvar a planilha automaticamente
-5. Exibir relatório de discrepâncias
+Override values from the command line:
 
-## 📝 Exemplo de Saída
-
-```
-Conectando à OCI para buscar custos...
-Sucesso! Encontrados custos para 15 compartments na OCI.
-Abrindo planilha: SUPTEC - GINS - CONSUMO OCI 2025.xlsx...
-Atualizando linhas...
-Planilha atualizada e salva com sucesso!
-
-----------------RELATÓRIO----------------
-✅ Todos os compartments da OCI foram mapeados na planilha.
------------------------------------------
+```bash
+python oci_cost_updater.py --excel-path sua-planilha.xlsx --sheet "OCI CONSUMO" --start 2026-04-21T00:00:00Z --end 2026-05-21T00:00:00Z --compartment-column A --target-column S --start-row 5
 ```
 
-## ⚠️ Observações Importantes
+Validate without saving the workbook:
 
-- O script utiliza `compartment_depth=6` para buscar subcompartments em até 6 níveis
-- Compartments não encontrados na planilha receberão valor R$ 0,00
-- Compartments da OCI não mapeados na planilha serão listados no relatório
-- **NUNCA versione** seu arquivo `~/.oci/config` ou chaves privadas
-- **NUNCA versione** planilhas Excel com dados reais (já incluído no `.gitignore`)
-- Revise permissões de acesso aos compartments OCI
-- Use políticas de IAM apropriadas para acesso read-only de custos
+```bash
+python oci_cost_updater.py --dry-run
+```
 
-## 🔒 Segurança
+Use a specific OCI profile:
 
-### ⚠️ Antes de Fazer Commit
+```bash
+python oci_cost_updater.py --oci-profile PROD
+```
 
-Certifique-se de que:
-1. Você não adicionou dados sensíveis nas configurações do script
-2. O arquivo `.gitignore` está protegendo planilhas Excel e credenciais
-3. Suas chaves privadas OCI não estão no repositório
+## CLI Options
 
-## 🤝 Contribuindo
+- `--excel-path`: Excel workbook path
+- `--sheet`: worksheet name; if omitted, the active sheet is used
+- `--start-row`: first row containing compartment data
+- `--compartment-column`: column with compartment names
+- `--target-column`: column where costs are written
+- `--start`: billing start in `YYYY-MM-DDTHH:MM:SSZ`
+- `--end`: billing end in `YYYY-MM-DDTHH:MM:SSZ`
+- `--oci-profile`: optional OCI config profile
+- `--compartment-depth`: OCI compartment depth, default `6`
+- `--env-file`: path to env file, default `.env`
+- `--dry-run`: runs without saving the workbook
+- `--log-level`: `DEBUG`, `INFO`, `WARNING`, or `ERROR`
 
-Contribuições são bem-vindas! Sinta-se à vontade para:
-- Reportar bugs
-- Sugerir novas funcionalidades
-- Enviar pull requests
+Command-line values take precedence over environment variables and `.env`.
 
-## 📄 Licença
+## Exit Codes
 
-Este projeto é de uso livre. Adapte conforme suas necessidades.
+- `0`: success
+- `1`: runtime failure, such as OCI or workbook save errors
+- `2`: invalid configuration, such as missing file, invalid date, invalid column, or missing worksheet
 
-## 👥 Autor
+## Tests
 
-**[@Celta031](https://github.com/Celta031)**
+```bash
+pytest
+```
 
-Desenvolvido para automatizar processos de gestão de custos OCI.
+The automated tests cover config precedence, date validation, cost aggregation, worksheet updates, `dry-run`, and missing worksheet handling.
+
+## Design
+
+See [SDD.md](SDD.md) for the production design and implementation decisions.
+
+## Local Legacy Script
+
+`atualizar_custos_oci.py` is treated as a local legacy script and is not required for the public workflow. New monthly runs should use `oci_cost_updater.py`.
